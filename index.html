@@ -1,0 +1,250 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Vasconta 语音记账 · 麦克风测试 V0.2</title><style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",Arial,sans-serif;color:#e6f4ff;background:#061324;font-size:16px}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 20% 0%,#0e3a55 0,#071c2b 38%,#061324 80%);min-height:100vh}header{padding:22px 20px 14px;max-width:620px;margin:auto}.kicker{font-size:11px;color:#44e2c7;letter-spacing:.16em;font-weight:800}.headline{font-size:27px;font-weight:850;letter-spacing:-.02em;margin:10px 0 5px}.sub{font-size:13px;line-height:1.7;color:#9bb5c6}.shell{padding:0 16px 36px;max-width:620px;margin:auto}.panel{background:#102335;border:1px solid #244155;border-radius:22px;padding:18px;margin-top:14px;box-shadow:0 14px 45px #0002}.panel h2{font-size:15px;margin:0 0 12px}.voice-btn{display:flex;align-items:center;justify-content:center;gap:9px;background:linear-gradient(115deg,#21d5bd,#21a4d7);border:0;border-radius:17px;color:#061c2b;font-size:17px;font-weight:800;width:100%;height:55px;cursor:pointer}.voice-btn:focus-visible{outline:3px solid #e5f4ff;outline-offset:3px}.voice-btn.active{background:linear-gradient(115deg,#ffbd60,#ff6e8d)}textarea{width:100%;min-height:110px;color:#e5f3ff;background:#071a2b;border:1px solid #335267;border-radius:14px;padding:12px;font:inherit;font-size:15px;resize:vertical;margin-top:14px;line-height:1.65}textarea:focus,input:focus,select:focus{outline:2px solid #21d5bd;outline-offset:1px}.hint{color:#9bb5c6;font-size:12px;line-height:1.7;margin:9px 0}button{cursor:pointer}.outline{border:1px solid #365568;border-radius:12px;background:#123048;color:#dbf7ff;font-weight:700;padding:10px 14px}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.row.between{justify-content:space-between}.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.primary{border:0;background:#22d7bd;color:#04211c;border-radius:12px;font-weight:800;padding:12px 16px}.warning{background:#3a2a23;border:1px solid #805739;color:#ffc590;padding:11px 12px;border-radius:12px;font-size:12px;line-height:1.5}.muted{color:#aac0ce;font-size:12px}.pill{font-size:11px;color:#43e7c5;background:#15453f;border-radius:100px;padding:5px 9px;font-weight:750}.entry{border:1px solid #365468;background:#0b2032;border-radius:16px;padding:14px;margin-top:10px}.amount{font-weight:850;font-size:24px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}.field label{font-size:11px;color:#a2bece}.field input,.field select{min-width:0;width:100%;background:#112e42;border:1px solid #31576c;color:#e5f4ff;border-radius:10px;padding:10px;font-size:14px}.bad{color:#ffc590;font-size:12px;margin-top:8px}.result{font-size:13px;color:#a5eaca;margin:9px 0 0}code{color:#71e9d7}footer{max-width:620px;margin:25px auto;padding:0 18px 35px;color:#859cac;font-size:11px;line-height:1.8}@media(max-width:360px){.fields{grid-template-columns:1fr}.headline{font-size:24px}}
+</style></head><body>
+<header><div class="kicker">VASCONTA / CADA CONTA CONTA.</div><div class="headline">说一句，就记好一笔。</div><div class="sub">点击麦克风 · 说出账目 · 自动整理 · 保存前核对（V0.2）</div></header>
+<main class="shell"><div class="panel"><h2>🎙 说出今天的开销</h2><button id="speak" class="voice-btn" type="button" aria-pressed="false">🎙 点击麦克风开始说话</button>
+<p id="mic-status" role="status" aria-live="polite" class="hint">正在检测设备是否支持网页语音识别……</p>
+<div id="environment" class="hint" style="border:1px solid #335267;padding:10px;border-radius:12px"></div>
+<button id="dictation" type="button" class="outline" style="width:100%;margin-top:8px">⌨️ 备用：调出键盘，用 iPhone 系统听写</button><textarea id="phrase" placeholder="例如：今天早上吃了早餐，花了十八块五，用支付宝付的。"></textarea><div class="buttons"><button id="parse" class="primary" type="button">解析账目</button><button id="example" class="outline" type="button">试试三笔示例</button><button id="single" class="outline" type="button">单笔示例</button></div></div>
+<div class="panel" id="preview-panel"><div class="row between"><h2 style="margin:0">识别结果</h2><span class="pill">仅供演示</span></div><p class="hint">不会写入你真正的 Vasconta、IndexedDB 或 Firebase。确认无误后可导出 JSON 供后续接入正式版本。本页不是正式账本。</p><div id="preview"><p class="muted">尚未解析。可以先点击“三笔示例”查看效果。</p></div><div id="warnings"></div><div class="buttons"><button id="export" class="primary" type="button" disabled>导出解析 JSON</button><button id="copy" class="outline" type="button" disabled>复制 JSON</button></div><p id="action-status" class="result"></p></div></main><footer>这是独立测试页，不含真实账本同步功能。文字解析在当前设备完成，音频不由本页面保存；浏览器语音识别可能调用外部服务处理音频，请勿在测试时说出敏感信息。正式使用前需要把页面通过 HTTPS 部署，并在你的设备上完成兼容性验证。</footer>
+<script>
+/* Vasconta voice-entry prototype v0.1: deterministic local parser, NO cloud writes. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.VascontaVoice = factory();
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  const digit = {'零':0,'〇':0,'一':1,'二':2,'两':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9};
+  function cnNumber(raw) {
+    const s = String(raw || '').replace(/\s/g,'');
+    if (/^\d+(\.\d+)?$/.test(s)) return Number(s);
+    if (s.includes('点')) {
+      const [a,b=''] = s.split('点');
+      const i=cnNumber(a); const dec = [...b].map(x=>x in digit?digit[x]:x).join('');
+      return Number.isFinite(i) && /^\d+$/.test(dec) ? Number(`${i}.${dec}`) : NaN;
+    }
+    if ([...s].every(x=>x in digit)) return Number([...s].map(x=>digit[x]).join(''));
+    let sum=0,section=0,current=0;
+    for (const ch of s) {
+      if (ch in digit) current=digit[ch];
+      else if (ch==='十') { section+=(current||1)*10; current=0; }
+      else if (ch==='百') { section+=(current||1)*100; current=0; }
+      else if (ch==='千') { section+=(current||1)*1000; current=0; }
+      else if (ch==='万') { sum+=(section+current||1)*10000; section=0;current=0; }
+      else return NaN;
+    }
+    return sum+section+current;
+  }
+  const n='(?:\\d+(?:\\.\\d+)?|[零〇一二两三四五六七八九十百千万]+(?:点[零〇一二两三四五六七八九]+)?)';
+  const moneyRe = new RegExp(`(${n})\\s*(元|块钱|块|角|毛)(?:\\s*([0-9零〇一二两三四五六七八九]{1,2})\\s*(角|毛|分)?)?(?:\\s*([0-9零〇一二两三四五六七八九])\\s*(分)?)?`,'g');
+  const payments=[['支付宝',/支付宝|花呗/],['微信',/微信|零钱通/],['现金',/现金/],['银行卡',/银行卡|信用卡|借记卡/]];
+  const pmWord='(?:支付宝|花呗|微信(?:支付)?|零钱通|现金|银行卡|信用卡|借记卡)';
+  const cleanPay = new RegExp(`(?:[，,。；;]?\\s*(?:用|从|通过)?\\s*${pmWord}\\s*(?:付的|付了|支付的|支付|付款|刷的|结账|付钱)?\\s*[，,。；;]?)`,'g');
+  const newActivity = /[，,。；;](?=(?:(?:今天|昨天|前天|明天)?(?:早上|上午|中午|下午|晚上|夜里|凌晨)?)(?:早餐|午餐|晚餐|夜宵|吃|喝|买|坐|打车|乘|花|消费|付|支出|点|还|又|然后))/;
+  function interpretMoney(m) {
+    const major=cnNumber(m[1]);
+    if(!Number.isFinite(major)) return NaN;
+    const unit=m[2]; let cents=0;
+    if(unit==='角'||unit==='毛') cents=Math.round(major*10);
+    else {
+      cents=Math.round(major*100);
+      if(m[3]) {
+        const f=cnNumber(m[3]);
+        if(!Number.isFinite(f)) return NaN;
+        if(m[4]==='分') cents+=Math.round(f);
+        else if(m[4]==='角'||m[4]==='毛') cents+=Math.round(f*10);
+        else cents+=Math.round(f*(m[3].length===2 ? 1:10));
+      }
+      if(m[5]) cents+=cnNumber(m[5]);
+    }
+    return cents;
+  }
+  function paymentFrom(s) {
+    for (const [name,regex] of payments) if(regex.test(s)) return name;
+    return '';
+  }
+  function categoryFrom(s) {
+    const x=s.replace(cleanPay,'');
+    if(/早饭|早点|早餐|早上吃/.test(x)) return '餐饮·早餐';
+    if(/夜宵|宵夜/.test(x)) return '餐饮·夜宵';
+    if(/啤酒|白酒|红酒|喝酒|酒水/.test(x)) return '餐饮·酒水';
+    if(/咖啡|奶茶|饮料|饮品|茶饮/.test(x)) return '餐饮·饮品';
+    if(/外卖|美团|饿了么/.test(x)) return '餐饮·外卖';
+    if(/午餐|晚餐|午饭|晚饭|牛肉粉|炒饭|吃饭|吃了|火锅|食堂|盖饭|面条/.test(x)) return '餐饮·正餐';
+    if(/地铁|公交/.test(x)) return '交通·公共交通';
+    if(/打车|滴滴|出租车/.test(x)) return '交通·打车';
+    if(/共享单车|骑行/.test(x)) return '交通·共享车';
+    if(/学车|模拟驾驶/.test(x)) return '驾照专项';
+    if(/电费|水费|物业费/.test(x)) return '住房·水电物业';
+    if(/话费|流量费/.test(x)) return '通讯·话费';
+    if(/理发|剪头发/.test(x)) return '个人护理·理发';
+    if(/采耳/.test(x)) return '个人护理·采耳';
+    if(/按摩/.test(x)) return '个人护理·按摩';
+    if(/订阅|会员|软件服务/.test(x)) return '数字服务·订阅';
+    if(/买|购买|超市|日用品/.test(x)) return '日用品';
+    return '待分类';
+  }
+  function dateOffset(d,offset) {
+    const t=new Date(d+'T12:00:00'); t.setDate(t.getDate()+offset);
+    return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+  }
+  function dateFrom(s,today,lastDate) {
+    if(/前天/.test(s)) return dateOffset(today,-2);
+    if(/昨天/.test(s)) return dateOffset(today,-1);
+    if(/今天/.test(s)) return today;
+    return lastDate || today;
+  }
+  function cleanContext(s) {
+    return s.replace(cleanPay,'').replace(/[，,。；;]+/g,' ').replace(/(?:花了|花费|消费了|支出了|支付了|一共|总共|用了|付款|付了|块钱|金额)/g,' ').trim();
+  }
+  function parse(text, today) {
+    const input=String(text||'').replace(/\s+/g,' ').trim();
+    const day=today||new Date().toLocaleDateString('sv-SE');
+    const matches=[...input.matchAll(moneyRe)].map(m=>({start:m.index,end:m.index+m[0].length,m,amountCents:interpretMoney(m)}));
+    if (!matches.length) return {records:[],warnings:['没有找到明确的金额，请说出如“十八块五”或“18.5元”的金额。']};
+    const records=[], warnings=[];
+    let date=day;
+    for(let i=0;i<matches.length;i++) {
+      const it=matches[i];
+      const before=input.slice(i===0?0:matches[i-1].end,it.start);
+      const between=input.slice(it.end,i+1<matches.length?matches[i+1].start:input.length);
+      const ownAfter=between.split(newActivity)[0];
+      const ctx=cleanContext(before);
+      date=dateFrom(ctx,day,date);
+      const precedingPay = before.match(new RegExp(`(?:用|通过)\\s*${pmWord}\\s*(?:付|支付|刷)?`,'g'));
+      const payment=paymentFrom(ownAfter)||paymentFrom(precedingPay?.[precedingPay.length-1]||'');
+      const category=categoryFrom(ctx);
+      const raw=ctx||'未指定用途';
+      if(!Number.isSafeInteger(it.amountCents)||it.amountCents<=0){warnings.push(`第${i+1}笔金额无法可靠识别，请手动核对。`);continue;}
+      const kind=/退款|退回/.test(ctx)?'退款':/工资|收入|奖金|收款|到账/.test(ctx)?'收入':'支出';
+      const record={txnDate:date,txnType:kind,amountCents:it.amountCents,category,paymentMethod:payment||'未指定',note:raw,sourceText:input.slice(i===0?0:matches[i-1].end, i+1<matches.length?matches[i+1].start:input.length).trim(),needsReview:category==='待分类'||!payment};
+      records.push(record);
+    }
+    if(matches.length!==records.length) warnings.push('有金额未能转为账目。');
+    return {records,warnings};
+  }
+  return {parse,cnNumber,interpretMoney};
+});
+
+</script><script>
+(()=>{'use strict';const $=id=>document.getElementById(id);let records=[];
+const cats=['餐饮·早餐','餐饮·正餐','餐饮·夜宵','餐饮·外卖','餐饮·酒水','餐饮·饮品','交通·公共交通','交通·打车','交通·共享车','驾照专项','住房·水电物业','通讯·话费','数字服务·订阅','个人护理·理发','个人护理·采耳','个人护理·按摩','日用品','待分类'];
+const ways=['未指定','支付宝','微信','现金','银行卡'];const types=['支出','收入','退款','转账'];
+const newEl=(tag,className,text)=>{const el=document.createElement(tag); if(className)el.className=className;if(text!=null)el.textContent=text;return el;};
+const optionList=(select,arr,val)=>{for(const v of arr){const o=newEl('option','',v);o.value=v;select.append(o);}if(!arr.includes(val)){const o=newEl('option','',val);o.value=val;select.append(o);}select.value=val;};
+function field(label,val,onUpdate,options,type='text',full=false){const b=newEl('div','field'+(full?' full':''));const lbl=newEl('label','',label);const inp=options?newEl('select'):newEl('input');if(options)optionList(inp,options,val);else{inp.type=type;inp.value=val;}inp.addEventListener('change',()=>onUpdate(inp.value));b.append(lbl,inp);return b;}
+function render(){const view=$('preview');view.replaceChildren();for(const [idx,r] of records.entries()){const b=newEl('div','entry');const head=newEl('div','row between');head.append(newEl('div','amount',`¥${(r.amountCents/100).toFixed(2)}`),newEl('span','muted',`第 ${idx+1} 笔`));b.append(head);const f=newEl('div','fields');f.append(
+field('金额（元）',(r.amountCents/100).toFixed(2),x=>{r.amountCents=Math.round(Number(x)*100);render()},null,'number'),
+field('日期',r.txnDate,x=>{r.txnDate=x},null,'date'),
+field('类型',r.txnType,x=>{r.txnType=x},types),
+field('类别',r.category,x=>{r.category=x},cats),
+field('支付方式',r.paymentMethod,x=>{r.paymentMethod=x},ways),
+field('备注',r.note,x=>{r.note=x},null,'text',true));b.append(f);
+if(r.paymentMethod==='未指定'||r.category==='待分类')b.append(newEl('div','bad','⚠ 未说清的字段已标记，请核对后再记账。'));
+view.append(b)}
+if(!records.length)view.append(newEl('p','muted','没有解析到有效账目，请补充金额。'));
+$('export').disabled=$('copy').disabled=!records.length;
+}
+function parse(){const result=VascontaVoice.parse($('phrase').value);records=result.records;$('warnings').replaceChildren();for(const warning of result.warnings)$('warnings').append(newEl('p','warning',warning));$('action-status').textContent='';render();}
+$('parse').addEventListener('click',parse);
+$('example').addEventListener('click',()=>{$('phrase').value='今天早上早餐十八块五，支付宝付的，中午吃牛肉粉花了二十二块，微信付的，下午坐地铁花了三块';parse();});
+$('single').addEventListener('click',()=>{$('phrase').value='今天早上吃了早餐，花了十八块五，用支付宝付的。';parse();});
+function output(){return JSON.stringify({format:'vasconta-voice-prototype-v0.2',records:records.map(({needsReview,sourceText,...rest})=>rest)},null,2)}
+$('export').addEventListener('click',()=>{const blob=new Blob([output()],{type:'application/json;charset=utf-8'});const a=document.createElement('a');const url=URL.createObjectURL(blob);a.href=url;a.download='vasconta-voice-preview.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('action-status').textContent='已导出预览 JSON，尚未写入正式账本。';});
+$('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(output());$('action-status').textContent='已复制解析 JSON。';}catch(e){$('action-status').textContent='当前环境不能自动复制，请使用“导出解析 JSON”。';}});
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null, state='idle', baseText='', hasFinal=false, lastError='';
+const status=(s)=>{$('mic-status').textContent=s;};
+const setState=(next)=>{
+  state=next;
+  const active=next==='starting'||next==='listening'||next==='stopping';
+  $('speak').classList.toggle('active',active);
+  $('speak').setAttribute('aria-pressed',active?'true':'false');
+  $('speak').textContent= active ? '■ 点击停止说话' : '🎙 点击麦克风开始说话';
+};
+function describeEnvironment(){
+  const secure=window.isSecureContext?'是':'否';
+  const proto=location.protocol==='file:'?'本地文件（file://）':location.protocol.replace(':','');
+  const recognizer=SpeechRecognition?'已检测到（仍需实际测试）':'当前浏览器未检测到';
+  $('environment').textContent=`设备检测：网页语音识别 ${recognizer}；安全上下文 ${secure}；打开方式 ${proto}。`;
+  if(location.protocol==='file:') status('本地 HTML 文件打开时，语音服务可能无法工作。建议通过 HTTPS 网页地址在 Safari 重新测试。');
+  else if(!window.isSecureContext) status('当前页面不是安全连接。请通过 HTTPS 地址打开后再测试。');
+  else if(!SpeechRecognition) status('当前浏览器不支持此页面的一键语音转文字。请使用下方“系统听写”备用入口。');
+  else status('点击上方麦克风，允许浏览器访问麦克风后说出一笔账。');
+}
+const errorMap={
+  'not-allowed':'浏览器未获授权使用麦克风。请到 Safari 网站设置中允许麦克风，再重试。',
+  'service-not-allowed':'设备拒绝启动语音识别服务。请用 Safari 的 HTTPS 页面重试，或者使用系统听写。',
+  'audio-capture':'设备没有可用麦克风，或麦克风已被其他程序占用。',
+  'no-speech':'没有检测到语音。请靠近手机麦克风，重新尝试。',
+  'network':'语音识别服务连接失败。部分设备的识别功能依赖网络，请检查网络后重试。',
+  'language-not-supported':'当前语音识别服务不支持简体中文。',
+  'aborted':'录音被停止。',
+  'bad-grammar':'语音识别服务返回语法错误。',
+  'not-supported':'当前浏览器不支持网页语音识别。'
+};
+function startSpeech(){
+  if(!SpeechRecognition){
+    status('浏览器未提供语音识别接口。点“系统听写”，再轻点 iPhone 键盘麦克风就可以说话记账。');
+    return;
+  }
+  if(!window.isSecureContext && location.protocol!=='file:'){
+    status('麦克风相关功能需要安全网页环境。请把测试页部署到 HTTPS 地址后重试。');return;
+  }
+  if(state!=='idle')return;
+  try{
+    rec=new SpeechRecognition();
+    rec.lang='zh-CN'; rec.continuous=false; rec.interimResults=true; rec.maxAlternatives=1;
+    baseText=$('phrase').value.trim(); hasFinal=false; lastError='';
+    rec.onstart=()=>{setState('listening');status('正在收听……请说“今天早餐十八块五，支付宝付的”。说完可点停止。');};
+    rec.onaudiostart=()=>{if(state==='starting')status('麦克风已连接，请开始说话。');};
+    rec.onspeechstart=()=>status('检测到你正在说话，正在识别……');
+    rec.onresult=(event)=>{
+      let finalText='',interimText='';
+      for(let i=0;i<event.results.length;i++){
+        const text=event.results[i][0]?.transcript||'';
+        if(event.results[i].isFinal)finalText+=text;else interimText+=text;
+      }
+      if(finalText)hasFinal=true;
+      const joined=[baseText, finalText+interimText].filter(Boolean).join('，');
+      $('phrase').value=joined;
+      if(finalText){parse();status('已识别语音并生成账目，请核对金额及支付方式。');}
+      else status('语音识别中：'+interimText);
+    };
+    rec.onerror=(event)=>{
+      lastError=event.error||'unknown';
+      status(errorMap[lastError]||`语音识别失败（${lastError}）。请改用系统听写。`);
+    };
+    rec.onend=()=>{
+      setState('idle');rec=null;
+      if(!lastError){
+        const spoken=$('phrase').value.trim();
+        if(spoken && spoken!==baseText){parse();status('语音已转成文字并解析，检查下方账目后再保存。');}
+        else status('本次没有得到可解析的语音文字。可重试，或使用“系统听写”。');
+      }
+    };
+    setState('starting');status('正在请求语音识别权限……请留意浏览器弹窗。');
+    rec.start();
+  }catch(e){
+    setState('idle');rec=null;
+    status(`无法启动语音识别（${e.name||'启动失败'}）。建议通过 Safari 的 HTTPS 网址访问，或用系统听写。`);
+  }
+}
+$('speak').addEventListener('click',()=>{
+  if(state==='starting'||state==='listening'){
+    setState('stopping');status('正在结束录音，整理识别结果……');
+    try{rec?.stop();}catch(e){setState('idle');status('录音已停止。');}
+  }else if(state==='idle')startSpeech();
+});
+$('dictation').addEventListener('click',()=>{
+  $('phrase').focus();
+  status('文字框已获得焦点，请点 iPhone 键盘上的麦克风说话；识别成文字后点“解析账目”。');
+});
+// Optional iOS Shortcuts integration: launch HTTPS page with ?speech=<encoded-text>
+const urlText=(new URLSearchParams(location.search)).get('speech');
+if(urlText){$('phrase').value=urlText;parse();status('已收到从快捷指令传入的听写内容，并完成解析。');
+  try{history.replaceState(null,'',location.pathname+location.hash);}catch(e){}
+}else{describeEnvironment();}
+
+})();
+</script></body></html>
